@@ -47,3 +47,17 @@ jobs:
         run: docker build -f tests/smoke/Dockerfile -t engram-mcp-smoke:ci .
       - name: run stdio smoke harness
         run: docker run --rm engram-mcp-smoke:ci
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      # The client ships as a pip package; prove it stays buildable and that
+      # the wheel actually installs + imports (metadata/layout regressions).
+      - run: pip install build
+      - run: python -m build
+      - run: pip install dist/*.whl && python -c "import engram_mcp"
